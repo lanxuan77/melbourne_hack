@@ -1,5 +1,12 @@
 import re
 
+MODES = [
+    "Simplify Language",
+    "Reduce Cognitive Load",
+    "Improve Visual Accessibility",
+    "Add Audio-Friendly Alternatives"
+]
+
 def count_words(text):
     return len(text.split())
 
@@ -47,7 +54,7 @@ def score_language(text):
 
     if len(long_words) > 10:
         score -= 5
-    elif len(long_words) > 5:
+    elif len(long_words) > 2:
         score -= 2
 
     return max(score, 0)
@@ -78,7 +85,21 @@ def score_cognitive_load(text):
     if headings == 0:
         score -= 3
 
+    bullets = text.count("-") + text.count("•")
+
+    if bullets == 0:
+        score -= 3
+
+    # numbered steps help with complex instructions
+    numbered_steps = len(
+        re.findall(r'(?m)^\s*\d+[\.\)]\s+', text)
+    )
+
+    if numbered_steps == 0:
+        score -= 2
+
     return max(score, 0)
+
 
 #visual organisation
 def score_visual(text):
@@ -99,8 +120,47 @@ def score_visual(text):
     bullets = text.count("-") + text.count("•")
 
     if bullets == 0:
-        score -= 4
+        score -= 3
     elif bullets < 3:
+        score -= 1
+
+    numbered_steps = len(
+        re.findall(r'(?m)^\s*\d+[\.\)]\s+', text)
+    )
+
+    if numbered_steps == 0:
+        score -= 2
+
+    #image/diagram descriptions
+    description_patterns = [
+        "image description",
+        "image:",
+        "diagram:",
+        "figure:",
+        "alt text",
+        "description:"
+    ]
+
+    description_count = sum(
+        text.lower().count(pattern)
+        for pattern in description_patterns
+    )
+
+    if description_count == 0:
+        score -= 3
+
+    # avoid relying on colour alone
+    colour_words = [
+        "red",
+        "green",
+        "blue",
+        "yellow",
+        "orange"
+    ]
+
+    colour_count = sum(text.lower().count(word) for word in colour_words)
+
+    if colour_count > 0 and "not rely on colour" not in text.lower():
         score -= 2
 
     #tables
@@ -124,17 +184,33 @@ def score_audio(text):
     #conversational transitions
     transitions = [
         "first",
+        "firstly",
         "next",
         "then",
         "finally",
         "in other words",
-        "for example"
+        "for example",
+        "to summarise",
+        "in summary"
     ]
 
     transition_count = sum(text.lower().count(word) for word in transitions)
 
     if transition_count == 0:
-        score -= 5
+        score -= 3
+
+    explanation_patterns = [
+        "means",
+        "refers to",
+        "in other words",
+        "simply put",
+        "in simple terms"
+    ]
+
+    explanation_count = sum(
+        text.lower().count(pattern)
+        for pattern in explanation_patterns
+    )
 
     return max(score, 0)
 
@@ -147,10 +223,10 @@ def calculate_score(text, mode):
     elif mode == "Reduce Cognitive Load":
         score = score_cognitive_load(text)
 
-    elif mode == "Visual":
+    elif mode == "Improve Visual Accessibility":
         score = score_visual(text)
 
-    elif mode == "Audio":
+    elif mode == "Add Audio-Friendly Alternatives":
         score = score_audio(text)
 
     else:
@@ -176,6 +252,8 @@ def compare_scores(original, adapted, mode):
     }
 
 
+
+#testtest
 '''
 if __name__ == "__main__":
 

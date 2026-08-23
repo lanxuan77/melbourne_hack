@@ -57,6 +57,8 @@ def score_language(text):
     elif len(long_words) > 2:
         score -= 2
 
+    score = score * 5
+
     return max(score, 0)
 
 #cognitive load
@@ -97,6 +99,8 @@ def score_cognitive_load(text):
 
     if numbered_steps == 0:
         score -= 2
+
+    score = score * 5
 
     return max(score, 0)
 
@@ -167,6 +171,8 @@ def score_visual(text):
     if "|" not in text:
         score -= 3
 
+    score = score * 5
+
     return max(score, 0)
 
 #audio friendly
@@ -211,6 +217,8 @@ def score_audio(text):
         text.lower().count(pattern)
         for pattern in explanation_patterns
     )
+
+    score = score * 5
 
     return max(score, 0)
 

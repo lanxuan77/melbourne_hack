@@ -8,6 +8,7 @@ st.set_page_config(
 )
 
 # Styling
+
 st.markdown(
     """
     <style>
@@ -15,7 +16,7 @@ st.markdown(
         /* Main page */
 
         .stApp {
-            background-color: #F8FAFC;
+            background-color: var(--st-background-color);
         }
 
         .block-container {
@@ -30,40 +31,42 @@ st.markdown(
         html, body, [class*="css"] {
             font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
             font-style: normal;
-            color: #1F2937;
+            color: var(--st-text-color);
         }
 
 
         /* Headings */
-        
+
         h1 {
             font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
             font-weight: 700;
             letter-spacing: -0.04em;
-            color: #1F2937;
+            color: var(--st-text-color);
         }
 
         h2, h3 {
             font-family: "Helvetica Neue", Arial, sans-serif;
             font-weight: 700;
             letter-spacing: -0.02em;
-            color: #1F2937;
+            color: var(--st-text-color);
         }
+
 
         /* Small captions */
 
         div[data-testid="stCaptionContainer"],
         div[data-testid="stCaptionContainer"] * {
-            color: #6B7280 !important;
+            color: var(--st-text-color) !important;
+            opacity: 0.65;
             font-size: 0.88rem !important;
         }
+
 
         /* Homepage hero section */
 
         .hero {
             padding: 4rem 2rem 1.5rem 2rem;
             text-align: center;
-
             border-radius: 24px;
             margin-bottom: 2rem;
         }
@@ -73,7 +76,7 @@ st.markdown(
             font-weight: 700;
             letter-spacing: 0.08em;
             text-transform: uppercase;
-            color: #3B5CCC;
+            color: var(--st-primary-color);
             margin-bottom: 0.5rem;
         }
 
@@ -83,7 +86,7 @@ st.markdown(
             line-height: 1.02;
             font-weight: 700;
             letter-spacing: -0.04em;
-            color: #1F2937;
+            color: var(--st-text-color);
             margin-bottom: 1rem;
         }
 
@@ -93,7 +96,8 @@ st.markdown(
             text-align: center;
             font-size: 1.12rem;
             line-height: 1.7;
-            color: #6B7280;
+            color: var(--st-text-color);
+            opacity: 0.7;
         }
 
 
@@ -104,22 +108,27 @@ st.markdown(
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.06em;
-            color: #6B7280;
+            color: var(--st-text-color);
+            opacity: 0.65;
             margin-bottom: 0.75rem;
         }
 
-        /* Accesbility scores */
+
+        /* Accessibility scores */
 
         .score {
             font-size: 3.2rem;
             font-weight: 700;
             line-height: 1;
-            color: #1F2937;
+            color: var(--st-text-color);
             margin: 0.2rem 0 0.6rem 0;
         }
+
         .muted {
-            color: #6B7280;
+            color: var(--st-text-color);
+            opacity: 0.65;
         }
+
 
         /* Buttons */
 
@@ -130,30 +139,37 @@ st.markdown(
         }
 
         div.stButton > button[kind="primary"] {
-            background-color: #3B5CCC;
-            color: white;
-            border: none;
+            background-color: #3B5CCC !important;
+            color: #FFFFFF !important;
+            border: none !important;
         }
 
         div.stButton > button[kind="primary"]:hover {
-            background-color: #304BA8;
-            color: white;
+            background-color: #304BA8 !important;
+            color: #FFFFFF !important;
+            border: none !important;
         }
-        
+
+
+        /* Homepage feature captions */
+
         .feature-caption {
             font-style: italic;
-            color: #6B7280;
+            color: var(--st-text-color);
+            opacity: 0.68;
             font-size: 0.95rem;
             line-height: 1.55;
             margin-bottom: 0;
         }
 
 
-        /* cards */
+        /* Cards */
 
         div[data-testid="stVerticalBlockBorderWrapper"] {
             border-radius: 16px;
-            background-color: #FFFFFF;}
+            background-color: var(--st-secondary-background-color);
+            border-color: var(--st-border-color);
+        }
 
     </style>
     """,

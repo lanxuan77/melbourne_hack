@@ -60,3 +60,14 @@ Scoring: Python-based rule system
 - Alice Sun (Frontend & UI)
 - Elena Yu (AI Integration & Prompt)
 - Yilia Sun (Accessibility Scoring & Evaluation）
+
+# AI Declaration
+Disclosure of AI-assisted developments & libraries:
+
+We acknowledge the use of ChatGPT and Gemini to assist with code development and project incorporation during this project.
+
+AI tools were used to support efficient code development and to provide proofreading and debugging assistance. All final implementation decisions, testing, and integration were completed and reviewed by the team.
+
+A full record of relevant prompts and outputs is available upon request.
+
+

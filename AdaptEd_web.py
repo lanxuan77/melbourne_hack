@@ -562,37 +562,39 @@ elif st.session_state.page == "analysis":
 
     st.write("")
     c1, c2, c3 = st.columns([1, 1.2, 1])
+    
     with c2:
         if st.button(
             "Generate accessible version →",
             type="primary",
             use_container_width=True,
         ):
-            prompt = build_prompt(
-                if st.button("Start another lesson", use_container_width=True):
-                    st.session_state.lesson_text = ""
-                    st.session_state.profile = {}
-                    st.session_state.target_modifications = []
-                    st.session_state.pop("adapted_result", None)
-                    st.session_state.pop("score_result", None)
-                    go("setup")
-            )
-
-            result = generate_adapted_lesson(prompt)
-
-            st.session_state.adapted_result = result
-
-            # Calculate accessibility scores
-            score_result = compare_multiple_scores(
-                st.session_state.lesson_text,
-                result,
-                st.session_state.target_modifications
-            )
-
-            st.session_state.score_result = score_result
-
-            go("result")
-
+            try:
+                with st.spinner("Adapting your lesson..."):
+                    prompt = build_prompt(
+                        st.session_state.lesson_text,
+                        st.session_state.target_modifications
+                    )
+    
+                    result = generate_adapted_lesson(prompt)
+    
+                    score_result = compare_multiple_scores(
+                        st.session_state.lesson_text,
+                        result,
+                        st.session_state.target_modifications
+                    )
+    
+                    st.session_state.adapted_result = result
+                    st.session_state.score_result = score_result
+    
+                go("result")
+    
+            except Exception as error:
+                st.error(
+                    "We couldn't generate the accessible version. "
+                    "Please try again."
+                )
+                st.caption(f"Technical details: {error}")
 
 # Page 4 - Result
 elif st.session_state.page == "result":
@@ -697,4 +699,7 @@ elif st.session_state.page == "result":
         if st.button("Start another lesson", use_container_width=True):
             st.session_state.lesson_text = ""
             st.session_state.profile = {}
+            st.session_state.target_modifications = []
+            st.session_state.pop("adapted_result", None)
+            st.session_state.pop("score_result", None)
             go("setup")

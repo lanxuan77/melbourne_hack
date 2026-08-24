@@ -462,6 +462,7 @@ elif st.session_state.page == "setup":
                 "focus": focus,
                 "language": language,
                 "audio": audio,
+                "visual": visual,
             }
             go("analysis")
 
@@ -499,12 +500,10 @@ elif st.session_state.page == "analysis":
             selected = [
                 label
                 for key, label in [
-                    ("focus", "Focus"),
-                    ("literacy", "Literacy"),
+                    ("focus", "Cognitive Load"),
                     ("language", "Language"),
                     ("audio", "Audio"),
-                    ("vision", "Visual"),
-                    ("offline", "Offline"),
+                    ("visual", "Visual"),
                 ]
                 if p.get(key)
             ]
@@ -568,8 +567,13 @@ elif st.session_state.page == "analysis":
             use_container_width=True,
         ):
             prompt = build_prompt(
-                st.session_state.lesson_text,
-                st.session_state.target_modifications
+                if st.button("Start another lesson", use_container_width=True):
+                    st.session_state.lesson_text = ""
+                    st.session_state.profile = {}
+                    st.session_state.target_modifications = []
+                    st.session_state.pop("adapted_result", None)
+                    st.session_state.pop("score_result", None)
+                    go("setup")
             )
 
             result = generate_adapted_lesson(prompt)

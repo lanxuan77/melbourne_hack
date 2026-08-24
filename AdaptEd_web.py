@@ -226,7 +226,7 @@ if st.session_state.page == "home":
     st.markdown(
         """
         <div class="hero">
-            <div class="hero-title">AdaptEd</div>
+            <div class="eyebrow">AdaptEd</div>
             <div class="eyebrow">Make learning accessible to everyone</div>
             <div class="hero-title">One lesson.<br>For all learners.</div>
             <div class="hero-copy">

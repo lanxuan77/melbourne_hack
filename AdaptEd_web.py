@@ -196,53 +196,6 @@ def go(page_name):
     st.rerun()
 
 
-# MOCK BACKEND (replace later)
-def mock_analysis():
-    """Replace later with Person 2/3 backend functions."""
-    return [
-        {
-            "title": "Dense instructions",
-            "detail": "Long blocks of information may be difficult for some learners to process.",
-        },
-        {
-            "title": "Advanced vocabulary",
-            "detail": "Several terms may need simpler explanations or vocabulary support.",
-        },
-        {
-            "title": "Connectivity dependency",
-            "detail": "The lesson includes activities that may require reliable internet access.",
-        },
-        {
-            "title": "Visual-only information",
-            "detail": "Important meaning may depend on a diagram or visual without a text alternative.",
-        },
-    ]
-
-
-def mock_adapted_lesson():
-    return """
-### Topic: The Water Cycle
-
-#### Key idea
-Water continuously moves between Earth's surface and the atmosphere.
-
-#### Step 1 — Evaporation
-Heat from the sun changes liquid water into water vapour.
-
-**Important word:** *Evaporation* — when liquid water becomes a gas.
-
-#### Step 2 — Condensation
-Water vapour cools and forms tiny droplets. These droplets can form clouds.
-
-#### Step 3 — Precipitation
-Water falls from clouds as rain, snow, sleet, or hail.
-
-#### Check your understanding
-**Where does the energy for evaporation come from?**
-
-*Hint: Think about what heats the Earth's surface.*
-"""
-
 
 def mock_teacher_guide():
     profile = st.session_state.profile
@@ -419,16 +372,12 @@ elif st.session_state.page == "setup":
     st.caption("Please select all that apply.")
 
     target_modifications = st.multiselect(
-        "How would you like to adapt this lesson?",
-        MODES,
-        default=st.session_state.get(
-            "target_modifications",
-            []
-        ),
-        placeholder="Select one or more options",
-    )
-
-    st.session_state.target_modifications = target_modifications
+    "How would you like to adapt this lesson?",
+    MODES,
+    key="target_modifications",
+    placeholder="Select one or more options",
+)
+    
 
     focus = "Reduce cognitive load" in target_modifications
     language = "Simplify language" in target_modifications
@@ -437,218 +386,111 @@ elif st.session_state.page == "setup":
 
     st.write("")
 
-    button_left, button_mid, button_right = st.columns([1, 1.2, 1])
+    # button_left, button_mid, button_right = st.columns([1, 1.2, 1])
 
-    with button_mid:
-        analyse_clicked = st.button(
-            "Analyse my lesson →",
-            type="primary",
-            use_container_width=True,
-        )
+    # with button_mid:
+    #     analyse_clicked = st.button(
+    #         "Analyse my lesson →",
+    #         type="primary",
+    #         use_container_width=True,
+    #     )
 
-    if analyse_clicked:
-        if not lesson.strip():
-            st.error("Please paste lesson content above.")
-    
-        elif not target_modifications:
-            st.error("Please select at least one learner support need.")
-
-        else:
-            st.session_state.profile = {
-                "internet": internet,
-                "class_size": class_size,
-                "devices": devices,
-                "printer": printer,
-                "projector": projector,
-                "headphones": headphones,
-                "focus": focus,
-                "language": language,
-                "audio": audio,
-                "visual": visual,
-            }
-            go("analysis")
+    # if analyse_clicked:
+    #     if not lesson.strip() and uploaded is None:
+    #         st.error("Please upload file or paste lesson content above.")
+    #     else:
+    #         st.session_state.profile = {
+    #             "internet": internet,
+    #             "class_size": class_size,
+    #             "devices": devices,
+    #             "printer": printer,
+    #             "projector": projector,
+    #             "headphones": headphones,
+    #             "focus": focus,
+    #             "language": language,
+    #             "audio": audio,
+    #         }
+    #         go("analysis")
 
 
-# Page 3 — Analysis
-elif st.session_state.page == "analysis":
-    top_left, top_right = st.columns([5, 1])
-    with top_left:
-        st.title("Accessibility analysis")
-        st.caption("Mock results for your UI prototype — connect the real analysis later.")
-    with top_right:
-        if st.button("← Edit", use_container_width=True):
-            go("setup")
-
-    st.divider()
-
-    score_col, summary_col = st.columns([1, 2], gap="large")
-
-    with score_col:
-        with st.container(border=True):
-            st.markdown('<div class="mini-label">Accessibility score</div>', unsafe_allow_html=True)
-            st.markdown('<div class="score">58 / 100</div>', unsafe_allow_html=True)
-            st.progress(58)
-            st.caption("Prototype score — your backend can calculate this later.")
-
-    with summary_col:
-        with st.container(border=True):
-            st.subheader("Classroom snapshot")
-            p = st.session_state.profile
-            a, b, c = st.columns(3)
-            a.metric("Students", p.get("class_size", 30))
-            b.metric("Devices", p.get("devices", 4))
-            c.metric("Internet", p.get("internet", "Limited"))
-
-            selected = [
-                label
-                for key, label in [
-                    ("focus", "Cognitive Load"),
-                    ("language", "Language"),
-                    ("audio", "Audio"),
-                    ("visual", "Visual"),
-                ]
-                if p.get(key)
-            ]
-
-            if selected:
-                st.write("**Selected support:** " + " • ".join(selected))
-            else:
-                st.write("**Selected support:** General accessibility")
-
-    st.write("")
-    st.subheader("Potential barriers")
-
-    issues = mock_analysis()
-
-    for i in range(0, len(issues), 2):
-        cols = st.columns(2)
-        for j, col in enumerate(cols):
-            idx = i + j
-            if idx < len(issues):
-                with col:
-                    with st.container(border=True, height = 150):
-                        st.markdown(f"### ⚠️ {issues[idx]['title']}")
-                        st.write(issues[idx]["detail"])
-
-    # st.write("")
-    # st.subheader("Classroom-aware recommendations")
-
-    # r1, r2 = st.columns(2)
-    # with r1:
-    #     with st.container(border=True):
-    #         st.markdown("### ✅ Adapt the material")
-    #         st.write(
-    #             "Break instructions into smaller steps, explain difficult vocabulary, "
-    #             "and create a print-friendly version."
-    #         )
-
-    # with r2:
-    #     with st.container(border=True):
-    #         st.markdown("### 🧩 Resource-aware adjustment")
-    #         p = st.session_state.profile
-    #         if p.get("devices", 0) < 5:
-    #             st.write(
-    #                 "There are too few devices for individual digital activities. "
-    #                 "Prefer paired/group work and printable resources."
-    #             )
-    #         elif p.get("internet") in ["Limited", "None"]:
-    #             st.write(
-    #                 "Avoid activities that depend on streaming or constant internet access."
-    #             )
-    #         else:
-    #             st.write(
-    #                 "Digital activities are feasible, but provide a printable alternative where possible."
-    #             )
 
     st.write("")
     c1, c2, c3 = st.columns([1, 1.2, 1])
-    
     with c2:
         if st.button(
             "Generate accessible version →",
             type="primary",
             use_container_width=True,
         ):
-            try:
-                with st.spinner("Adapting your lesson..."):
-                    prompt = build_prompt(
-                        st.session_state.lesson_text,
-                        st.session_state.target_modifications
-                    )
-    
-                    result = generate_adapted_lesson(prompt)
-    
-                    score_result = compare_multiple_scores(
+            if not lesson.strip():
+                st.error("Please paste lesson content above.")
+            else:
+                # Save classroom profile
+                st.session_state.profile = {
+                    "internet": internet,
+                    "class_size": class_size,
+                    "devices": devices,
+                    "printer": printer,
+                    "projector": projector,
+                    "headphones": headphones,
+                    "focus": focus,
+                    "language": language,
+                    "audio": audio,
+            }
+
+                # Generate adapted lesson
+                prompt = build_prompt(
+                    st.session_state.lesson_text,
+                    st.session_state.target_modifications
+                ) 
+
+                result = generate_adapted_lesson(prompt)
+                st.session_state.adapted_result = result
+
+                score_results = {}
+
+                for mode in st.session_state.target_modifications:
+                    score_results[mode] = compare_scores(
                         st.session_state.lesson_text,
                         result,
-                        st.session_state.target_modifications
+                        mode
                     )
-    
-                    st.session_state.adapted_result = result
-                    st.session_state.score_result = score_result
-    
-                go("result")
-    
-            except Exception as error:
-                st.error(
-                    "We couldn't generate the accessible version. "
-                    "Please try again."
-                )
-                st.caption(f"Technical details: {error}")
 
-# Page 4 - Result
+                st.session_state.score_result = score_results
+
+                go("result")
+
+
+# Page 3 - Result
 elif st.session_state.page == "result":
     top_left, top_right = st.columns([5, 1])
     with top_left:
         st.title("Your adapted lesson")
         st.caption("A classroom-ready version generated around the selected needs and constraints.")
     with top_right:
-        if st.button("← Analysis", use_container_width=True):
-            go("analysis")
+        if st.button("← Edit", use_container_width=True):
+            go("setup")
 
     st.divider()
-    # if "adapted_result" in st.session_state:
-    #     st.markdown(st.session_state.adapted_result)
+
+    if "score_result" in st.session_state:
+        st.subheader("Accessibility score improvement")
+
+        for mode, scores in st.session_state.score_result.items():
+            st.markdown(f"### {mode}")
+
+            col1, col2, col3 = st.columns(3)
+
+            col1.metric("Before", scores["before"])
+            col2.metric("After", scores["after"])
+            col3.metric(
+                "Improvement",
+                f"+{scores['improvement']}"
+                if scores["improvement"] >= 0
+                else str(scores["improvement"])
+            )
 
     full_result = st.session_state.adapted_result
-
-    score_result = st.session_state.get(
-        "score_result",
-        {
-            "before": 0,
-            "after": 0,
-            "improvement": 0
-        }
-    )
-
-    before = score_result["before"]
-    after = score_result["after"]
-    improvement = score_result["improvement"]
-
-    st.subheader("Accessibility improvement")
-
-    score_col1, score_col2, score_col3 = st.columns(3)
-
-    with score_col1:
-        st.metric(
-            "Before",
-            f"{before}/100"
-        )
-
-    with score_col2:
-        st.metric(
-            "After",
-            f"{after}/100",
-            f"+{improvement}"
-        )
-
-    with score_col3:
-        st.metric(
-            "Improvement",
-            f"{improvement} points"
-        )
-
-    st.progress(after)
 
     if "## Accessibility Notes" in full_result:
         adapted_lesson, accessibility_notes = full_result.split(
@@ -700,6 +542,4 @@ elif st.session_state.page == "result":
             st.session_state.lesson_text = ""
             st.session_state.profile = {}
             st.session_state.target_modifications = []
-            st.session_state.pop("adapted_result", None)
-            st.session_state.pop("score_result", None)
             go("setup")

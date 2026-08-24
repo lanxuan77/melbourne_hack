@@ -2,7 +2,7 @@ import streamlit as st
 
 from prompts import build_prompt
 from ai_service import generate_adapted_lesson
-from scoring import MODES, compare_multiple_scores
+from scoring import MODES, calculate_score, compare_scores, compare_multiple_scores
 
 st.set_page_config(
     page_title="AdaptEd",

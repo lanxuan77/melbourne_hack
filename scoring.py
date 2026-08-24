@@ -4,7 +4,7 @@ MODES = [
     "Simplify language",
     "Reduce cognitive load",
     "Improve visual accessibility",
-    "Add audio-friendly alternatives"
+    "Audio accessibility"
 ]
 
 def count_words(text):
@@ -234,7 +234,7 @@ def calculate_score(text, mode):
     elif mode == "Improve visual accessibility":
         score = score_visual(text)
 
-    elif mode == "Add audio-friendly alternatives":
+    elif mode == "Audio accessibility":
         score = score_audio(text)
 
     else:
@@ -327,7 +327,7 @@ if __name__ == "__main__":
     result = compare_scores(
         original,
         adapted,
-        "Simplify Language"
+        "Simplify language"
     )
 
     print(result)

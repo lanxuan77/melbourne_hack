@@ -381,36 +381,36 @@ elif st.session_state.page == "setup":
 
     focus = "Reduce cognitive load" in target_modifications
     language = "Simplify language" in target_modifications
-    audio = "Add audio-friendly alternatives" in target_modifications
+    audio = "Audio accessibility" in target_modifications
     visual = "Improve visual accessibility" in target_modifications
 
     st.write("")
 
-    button_left, button_mid, button_right = st.columns([1, 1.2, 1])
+    # button_left, button_mid, button_right = st.columns([1, 1.2, 1])
 
-    with button_mid:
-        analyse_clicked = st.button(
-            "Analyse my lesson →",
-            type="primary",
-            use_container_width=True,
-        )
+    # with button_mid:
+    #     analyse_clicked = st.button(
+    #         "Analyse my lesson →",
+    #         type="primary",
+    #         use_container_width=True,
+    #     )
 
-    if analyse_clicked:
-        if not lesson.strip() and uploaded is None:
-            st.error("Please upload file or paste lesson content above.")
-        else:
-            st.session_state.profile = {
-                "internet": internet,
-                "class_size": class_size,
-                "devices": devices,
-                "printer": printer,
-                "projector": projector,
-                "headphones": headphones,
-                "focus": focus,
-                "language": language,
-                "audio": audio,
-            }
-            go("analysis")
+    # if analyse_clicked:
+    #     if not lesson.strip() and uploaded is None:
+    #         st.error("Please upload file or paste lesson content above.")
+    #     else:
+    #         st.session_state.profile = {
+    #             "internet": internet,
+    #             "class_size": class_size,
+    #             "devices": devices,
+    #             "printer": printer,
+    #             "projector": projector,
+    #             "headphones": headphones,
+    #             "focus": focus,
+    #             "language": language,
+    #             "audio": audio,
+    #         }
+    #         go("analysis")
 
 
 
@@ -422,16 +422,43 @@ elif st.session_state.page == "setup":
             type="primary",
             use_container_width=True,
         ):
-            prompt = build_prompt(
-                st.session_state.lesson_text,
-                st.session_state.target_modifications
-            )
+            if not lesson.strip():
+                st.error("Please paste lesson content above.")
+            else:
+                # Save classroom profile
+                st.session_state.profile = {
+                    "internet": internet,
+                    "class_size": class_size,
+                    "devices": devices,
+                    "printer": printer,
+                    "projector": projector,
+                    "headphones": headphones,
+                    "focus": focus,
+                    "language": language,
+                    "audio": audio,
+            }
 
-            result = generate_adapted_lesson(prompt)
+                # Generate adapted lesson
+                prompt = build_prompt(
+                    st.session_state.lesson_text,
+                    st.session_state.target_modifications
+                ) 
 
-            st.session_state.adapted_result = result
+                result = generate_adapted_lesson(prompt)
+                st.session_state.adapted_result = result
 
-            go("result")
+                score_results = {}
+
+                for mode in st.session_state.target_modifications:
+                    score_results[mode] = compare_scores(
+                        st.session_state.lesson_text,
+                        result,
+                        mode
+                    )
+
+                st.session_state.score_result = score_results
+
+                go("result")
 
 
 # Page 3 - Result
@@ -445,6 +472,23 @@ elif st.session_state.page == "result":
             go("setup")
 
     st.divider()
+
+    if "score_result" in st.session_state:
+        st.subheader("Accessibility score improvement")
+
+        for mode, scores in st.session_state.score_result.items():
+            st.markdown(f"### {mode}")
+
+            col1, col2, col3 = st.columns(3)
+
+            col1.metric("Before", scores["before"])
+            col2.metric("After", scores["after"])
+            col3.metric(
+                "Improvement",
+                f"+{scores['improvement']}"
+                if scores["improvement"] >= 0
+                else str(scores["improvement"])
+            )
 
     full_result = st.session_state.adapted_result
 

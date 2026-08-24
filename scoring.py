@@ -1,10 +1,10 @@
-import re
+rt re
 
 MODES = [
-    "Simplify Language",
-    "Reduce Cognitive Load",
-    "Improve Visual Accessibility",
-    "Add Audio-Friendly Alternatives"
+    "Simplify language",
+    "Reduce cognitive load",
+    "Improve visual accessibility",
+    "Add audio-friendly alternatives"
 ]
 
 def count_words(text):
@@ -225,16 +225,16 @@ def score_audio(text):
 #overall scoring
 def calculate_score(text, mode):
 
-    if mode == "Simplify Language":
+    if mode == "Simplify language":
         score = score_language(text)
 
-    elif mode == "Reduce Cognitive Load":
+    elif mode == "Reduce cognitive load":
         score = score_cognitive_load(text)
 
-    elif mode == "Improve Visual Accessibility":
+    elif mode == "Improve visual accessibility":
         score = score_visual(text)
 
-    elif mode == "Add Audio-Friendly Alternatives":
+    elif mode == "Add audio-friendly alternatives":
         score = score_audio(text)
 
     else:

@@ -68,6 +68,15 @@ st.markdown(
 
         /* Homepage hero section */
 
+        .brand-title {
+            font-family: "Avenir Next", "Helvetica Neue", Arial, sans-serif;
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            color: #3B5CCC;
+            margin-bottom: 0.5rem;
+        }
+
         .hero {
             padding: 4rem 2rem 1.5rem 2rem;
             text-align: center;

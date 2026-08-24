@@ -2,6 +2,8 @@ import streamlit as st
 
 from prompts import build_prompt
 from ai_service import generate_adapted_lesson
+from scoring import compare_multiple_scores
+from scoring import compare_scores
 
 st.set_page_config(
     page_title="AdaptEd",
@@ -364,11 +366,11 @@ elif st.session_state.page == "setup":
     with left:
         st.subheader("1. Your lesson")
         with st.container(border=True, height = 500):
-            # uploaded = st.file_uploader(
-            #     "Upload a lesson",
-            #     type=["pdf", "txt"],
-            #     help="Upload your lesson here for analysis and simplification.",
-            # )
+            uploaded = st.file_uploader(
+                 "Upload a lesson",
+                 type=["pdf", "txt"],
+                 help="Upload your lesson here for analysis and simplification.",
+            )
 
             lesson = st.text_area(
                 "Paste lesson content",
@@ -418,13 +420,20 @@ elif st.session_state.page == "setup":
     st.caption("Please select all that apply.")
 
     target_modifications = st.multiselect(
-    "How would you like to adapt this lesson?",
-    [
-        "Reduce cognitive load",
-        "Simplify language",
-        "Audio accessibility",
-        "Improve visual accessibility"
-    ],
+        "How would you like to adapt this lesson?",
+        [
+            "Reduce Cognitive Load",
+            "Simplify Language",
+            "Add Audio-Friendly Alternatives",
+            "Improve Visual Accessibility"
+        ],
+        default=st.session_state.get(
+            "target_modifications",
+            []
+        ),
+        placeholder="Select one or more options"
+    )
+
     default=st.session_state.get("target_modifications", []),
     placeholder="Select one or more options"
 )
@@ -574,6 +583,15 @@ elif st.session_state.page == "analysis":
 
             st.session_state.adapted_result = result
 
+            # Calculate accessibility scores
+            score_result = compare_multiple_scores(
+                st.session_state.lesson_text,
+                result,
+                st.session_state.target_modifications
+            )
+
+            st.session_state.score_result = score_result
+
             go("result")
 
 
@@ -592,6 +610,44 @@ elif st.session_state.page == "result":
     #     st.markdown(st.session_state.adapted_result)
 
     full_result = st.session_state.adapted_result
+
+    score_result = st.session_state.get(
+        "score_result",
+        {
+            "before": 0,
+            "after": 0,
+            "improvement": 0
+        }
+    )
+
+    before = score_result["before"]
+    after = score_result["after"]
+    improvement = score_result["improvement"]
+
+    st.subheader("Accessibility improvement")
+
+    score_col1, score_col2, score_col3 = st.columns(3)
+
+    with score_col1:
+        st.metric(
+            "Before",
+            f"{before}/100"
+        )
+
+    with score_col2:
+        st.metric(
+            "After",
+            f"{after}/100",
+            f"+{improvement}"
+        )
+
+    with score_col3:
+        st.metric(
+            "Improvement",
+            f"{improvement} points"
+        )
+
+    st.progress(after)
 
     if "## Accessibility Notes" in full_result:
         adapted_lesson, accessibility_notes = full_result.split(

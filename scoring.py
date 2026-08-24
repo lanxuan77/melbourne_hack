@@ -259,7 +259,44 @@ def compare_scores(original, adapted, mode):
         "improvement": improvement
     }
 
+def compare_multiple_scores(original, adapted, modes):
 
+    results = []
+
+    for mode in modes:
+
+        result = compare_scores(
+            original,
+            adapted,
+            mode
+        )
+
+        results.append(result)
+
+    if not results:
+        return {
+            "before": 0,
+            "after": 0,
+            "improvement": 0,
+            "details": []
+        }
+
+    before_average = sum(
+        result["before"] for result in results
+    ) / len(results)
+
+    after_average = sum(
+        result["after"] for result in results
+    ) / len(results)
+
+    improvement = after_average - before_average
+
+    return {
+        "before": round(before_average),
+        "after": round(after_average),
+        "improvement": round(improvement),
+        "details": results
+    }
 
 #testtest
 '''

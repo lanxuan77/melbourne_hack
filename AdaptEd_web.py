@@ -473,6 +473,14 @@ elif st.session_state.page == "setup":
                 )
             
                 result = generate_adapted_lesson(prompt)
+
+                score_result = compare_multiple_scores(
+                    st.session_state.lesson_text,
+                    result,
+                    st.session_state.target_modifications
+                )
+                
+                st.session_state.score_result = score_result
             
                 st.session_state.adapted_result = result
 
@@ -485,8 +493,8 @@ elif st.session_state.page == "result":
         st.title("Your adapted lesson")
         st.caption("A classroom-ready version generated around the selected needs and constraints.")
     with top_right:
-        if st.button("← Analysis", use_container_width=True):
-            go("analysis")
+        if st.button("← Edit", use_container_width=True):
+            go("setup")
 
     st.divider()
     # if "adapted_result" in st.session_state:

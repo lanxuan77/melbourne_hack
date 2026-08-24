@@ -1,18 +1,24 @@
 import re
 
+
+# Keep accessibility mode names in ONE place
 MODES = [
-    "Simplify Language",
-    "Reduce Cognitive Load",
-    "Improve Visual Accessibility",
-    "Audio accessibility"
+    "Simplify language",
+    "Reduce cognitive load",
+    "Improve visual accessibility",
+    "Audio accessibility",
 ]
+
+# Basic text helpers
 
 def count_words(text):
     return len(text.split())
 
+
 def count_sentences(text):
-    sentences = re.split(r'[.!?]+', text)
-    return len([s for s in sentences if s.strip()])
+    sentences = re.split(r"[.!?]+", text)
+    return len([sentence for sentence in sentences if sentence.strip()])
+
 
 def average_sentence_length(text):
     words = count_words(text)
@@ -23,104 +29,115 @@ def average_sentence_length(text):
 
     return words / sentences
 
+
 def count_long_paragraphs(text, limit=100):
     paragraphs = text.split("\n\n")
 
-    count = 0
+    return sum(
+        1
+        for paragraph in paragraphs
+        if len(paragraph.split()) > limit
+    )
 
-    for paragraph in paragraphs:
-        if len(paragraph.split()) > limit:
-            count += 1
 
-    return count
+def clamp_score(score):
+    """Keep accessibility scores between 0 and 100."""
+    return max(0, min(score, 100))
 
-#simplify language
+
+# ---------------------------------------------------------
+# Simplify language
+# ---------------------------------------------------------
+
 def score_language(text):
-
     score = 20
 
     avg_length = average_sentence_length(text)
 
-    #long sentences are harder to read
+    # Long sentences are harder to process
     if avg_length > 30:
         score -= 5
     elif avg_length > 20:
         score -= 2
 
-    #look for technical terms / long words
+    # Approximate difficult / technical vocabulary
     words = text.split()
 
-    long_words = [word for word in words if len(re.sub(r'[^a-zA-Z]', '', word)) >= 12]
+    long_words = [
+        word
+        for word in words
+        if len(re.sub(r"[^a-zA-Z]", "", word)) >= 12
+    ]
 
     if len(long_words) > 10:
         score -= 5
     elif len(long_words) > 2:
         score -= 2
 
-    score = score * 5
+    return clamp_score(score * 5)
 
-    return max(score, 0)
 
-#cognitive load
+# ---------------------------------------------------------
+# Reduce cognitive load
+# ---------------------------------------------------------
+
 def score_cognitive_load(text):
-
     score = 20
 
     words = count_words(text)
     long_paragraphs = count_long_paragraphs(text)
 
-    #too much content
+    # Too much content can increase cognitive load
     if words > 700:
         score -= 5
     elif words > 500:
         score -= 3
 
-    #long paragraphs increase cognitive load
+    # Long paragraphs are harder to process
     if long_paragraphs >= 3:
         score -= 5
     elif long_paragraphs >= 1:
         score -= 2
 
-    #headings help organise information
+    # Headings improve structure
     headings = text.count("#")
 
     if headings == 0:
         score -= 3
 
+    # Bullets help break information into chunks
     bullets = text.count("-") + text.count("•")
 
     if bullets == 0:
         score -= 3
 
-    # numbered steps help with complex instructions
+    # Numbered steps help with instructions
     numbered_steps = len(
-        re.findall(r'(?m)^\s*\d+[\.\)]\s+', text)
+        re.findall(r"(?m)^\s*\d+[\.\)]\s+", text)
     )
 
     if numbered_steps == 0:
         score -= 2
 
-    score = score * 5
-
-    return max(score, 0)
+    return clamp_score(score * 5)
 
 
-#visual organisation
+# ---------------------------------------------------------
+# Improve visual accessibility
+# ---------------------------------------------------------
+
 def score_visual(text):
-
     score = 20
 
-    #headings
+    # Headings
     headings = text.count("#")
 
-    if headings >= 3:
-        score += 0
-    elif headings == 0:
+    if headings == 0:
         score -= 5
-    else:
+    elif headings < 3:
         score -= 2
 
-    #bullet points
+    # Bullet points
     bullets = text.count("-") + text.count("•")
 
     if bullets == 0:
@@ -128,21 +145,22 @@ def score_visual(text):
     elif bullets < 3:
         score -= 1
 
+    # Numbered steps
     numbered_steps = len(
-        re.findall(r'(?m)^\s*\d+[\.\)]\s+', text)
+        re.findall(r"(?m)^\s*\d+[\.\)]\s+", text)
     )
 
     if numbered_steps == 0:
         score -= 2
 
-    #image/diagram descriptions
+    # Image / diagram descriptions
     description_patterns = [
         "image description",
         "image:",
         "diagram:",
         "figure:",
         "alt text",
-        "description:"
+        "description:",
     ]
 
     description_count = sum(
@@ -153,41 +171,45 @@ def score_visual(text):
     if description_count == 0:
         score -= 3
 
-    # avoid relying on colour alone
+    # Avoid relying only on colour
     colour_words = [
         "red",
         "green",
         "blue",
         "yellow",
-        "orange"
+        "orange",
     ]
 
-    colour_count = sum(text.lower().count(word) for word in colour_words)
+    colour_count = sum(
+        text.lower().count(word)
+        for word in colour_words
+    )
 
-    if colour_count > 0 and "not rely on colour" not in text.lower():
+    if (
+        colour_count > 0
+        and "not rely on colour" not in text.lower()
+    ):
         score -= 2
 
-    #tables
-    if "|" not in text:
-        score -= 3
+    return clamp_score(score * 5)
 
-    score = score * 5
 
-    return max(score, 0)
+# ---------------------------------------------------------
+# Audio accessibility
+# ---------------------------------------------------------
 
-#audio friendly
 def score_audio(text):
-
     score = 20
 
     avg_length = average_sentence_length(text)
 
+    # Shorter sentences are easier to follow when heard aloud
     if avg_length > 30:
         score -= 5
     elif avg_length > 20:
         score -= 3
 
-    #conversational transitions
+    # Transitions make spoken content easier to follow
     transitions = [
         "first",
         "firstly",
@@ -197,20 +219,24 @@ def score_audio(text):
         "in other words",
         "for example",
         "to summarise",
-        "in summary"
+        "in summary",
     ]
 
-    transition_count = sum(text.lower().count(word) for word in transitions)
+    transition_count = sum(
+        text.lower().count(word)
+        for word in transitions
+    )
 
     if transition_count == 0:
         score -= 3
 
+    # Explanatory phrasing supports audio comprehension
     explanation_patterns = [
         "means",
         "refers to",
         "in other words",
         "simply put",
-        "in simple terms"
+        "in simple terms",
     ]
 
     explanation_count = sum(
@@ -218,57 +244,60 @@ def score_audio(text):
         for pattern in explanation_patterns
     )
 
-    score = score * 5
+    if explanation_count == 0:
+        score -= 2
 
-    return max(score, 0)
+    return clamp_score(score * 5)
 
-#overall scoring
+
+# ---------------------------------------------------------
+# Overall scoring
+# ---------------------------------------------------------
+
 def calculate_score(text, mode):
-
-    if mode == "Simplify Language":
+    if mode == "Simplify language":
         score = score_language(text)
 
-    elif mode == "Reduce Cognitive Load":
+    elif mode == "Reduce cognitive load":
         score = score_cognitive_load(text)
 
-    elif mode == "Improve Visual Accessibility":
+    elif mode == "Improve visual accessibility":
         score = score_visual(text)
 
-    elif mode == "Add Audio-Friendly Alternatives":
+    elif mode == "Audio accessibility":
         score = score_audio(text)
 
     else:
-        raise ValueError("Unknown accessibility mode")
+        raise ValueError(f"Unknown accessibility mode: {mode}")
 
     return {
         "score": score,
-        "mode": mode
+        "mode": mode,
     }
 
-#compare before and after
-def compare_scores(original, adapted, mode):
 
+def compare_scores(original, adapted, mode):
     before = calculate_score(original, mode)
     after = calculate_score(adapted, mode)
 
     improvement = after["score"] - before["score"]
 
     return {
+        "mode": mode,
         "before": before["score"],
         "after": after["score"],
-        "improvement": improvement
+        "improvement": improvement,
     }
 
-def compare_multiple_scores(original, adapted, modes):
 
+def compare_multiple_scores(original, adapted, modes):
     results = []
 
     for mode in modes:
-
         result = compare_scores(
             original,
             adapted,
-            mode
+            mode,
         )
 
         results.append(result)
@@ -278,15 +307,17 @@ def compare_multiple_scores(original, adapted, modes):
             "before": 0,
             "after": 0,
             "improvement": 0,
-            "details": []
+            "details": [],
         }
 
     before_average = sum(
-        result["before"] for result in results
+        result["before"]
+        for result in results
     ) / len(results)
 
     after_average = sum(
-        result["after"] for result in results
+        result["after"]
+        for result in results
     ) / len(results)
 
     improvement = after_average - before_average
@@ -295,41 +326,5 @@ def compare_multiple_scores(original, adapted, modes):
         "before": round(before_average),
         "after": round(after_average),
         "improvement": round(improvement),
-        "details": results
+        "details": results,
     }
-
-#testtest
-'''
-if __name__ == "__main__":
-
-    original = """
-    Photosynthesis is a complex biochemical process through
-    which photoautotrophic organisms convert radiant energy
-    into chemical energy.
-
-    This process involves multiple interconnected biochemical
-    pathways and cellular mechanisms.
-    """
-
-    adapted = """
-    ## What is photosynthesis?
-
-    Photosynthesis is how plants make food using light.
-
-    ### Key idea
-
-    - Plants use light energy.
-    - Plants use water.
-    - Plants use carbon dioxide.
-
-    In simple terms, plants turn these ingredients into food.
-    """
-
-    result = compare_scores(
-        original,
-        adapted,
-        "Simplify Language"
-    )
-
-    print(result)
-'''

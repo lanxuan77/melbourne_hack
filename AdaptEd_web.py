@@ -434,7 +434,7 @@ elif st.session_state.page == "setup":
 
     focus = "Reduce cognitive load" in target_modifications
     language = "Simplify language" in target_modifications
-    audio = "Add audio-friendly alternatives" in target_modifications
+    audio = "Audio accessibility" in target_modifications
     visual = "Improve visual accessibility" in target_modifications
 
     st.write("")
@@ -449,8 +449,8 @@ elif st.session_state.page == "setup":
         )
 
     if analyse_clicked:
-        if not lesson.strip() and uploaded is None:
-            st.error("Please upload file or paste lesson content above.")
+        if not lesson.strip():
+            st.error("Please paste lesson content above.")
         else:
             st.session_state.profile = {
                 "internet": internet,

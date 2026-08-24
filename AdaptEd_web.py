@@ -419,16 +419,15 @@ elif st.session_state.page == "setup":
     st.caption("Please select all that apply.")
 
     target_modifications = st.multiselect(
-    "How would you like to adapt this lesson?",
-    [
-        "Reduce cognitive load",
-        "Simplify language",
-        "Audio accessibility",
-        "Improve visual accessibility"
-    ],
-    default=st.session_state.get("target_modifications", []),
-    placeholder="Select one or more options"
-)
+        "How would you like to adapt this lesson?",
+        MODES,
+        default=st.session_state.get(
+            "target_modifications",
+            []
+        ),
+        placeholder="Select one or more options",
+    )
+
     st.session_state.target_modifications = target_modifications
 
     focus = "Reduce cognitive load" in target_modifications
@@ -450,6 +449,10 @@ elif st.session_state.page == "setup":
     if analyse_clicked:
         if not lesson.strip():
             st.error("Please paste lesson content above.")
+    
+        elif not target_modifications:
+            st.error("Please select at least one learner support need.")
+
         else:
             st.session_state.profile = {
                 "internet": internet,

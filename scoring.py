@@ -4,7 +4,7 @@ MODES = [
     "Simplify Language",
     "Reduce Cognitive Load",
     "Improve Visual Accessibility",
-    "Add Audio-Friendly Alternatives"
+    "Audio accessibility"
 ]
 
 def count_words(text):

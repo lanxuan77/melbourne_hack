@@ -1,4 +1,4 @@
-rt re
+import re
 
 MODES = [
     "Simplify language",

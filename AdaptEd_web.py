@@ -1,5 +1,8 @@
 import streamlit as st
 
+from prompts import build_prompt
+from ai_service import generate_adapted_lesson
+
 st.set_page_config(
     page_title="AdaptEd",
     page_icon="📚",
@@ -361,14 +364,14 @@ elif st.session_state.page == "setup":
     with left:
         st.subheader("1. Your lesson")
         with st.container(border=True, height = 500):
-            uploaded = st.file_uploader(
-                "Upload a lesson",
-                type=["pdf", "txt"],
-                help="Upload your lesson here for analysis and simplification.",
-            )
+            # uploaded = st.file_uploader(
+            #     "Upload a lesson",
+            #     type=["pdf", "txt"],
+            #     help="Upload your lesson here for analysis and simplification.",
+            # )
 
             lesson = st.text_area(
-                "Or paste lesson content",
+                "Paste lesson content",
                 value=st.session_state.lesson_text,
                 height=350,
                 placeholder=(
@@ -414,51 +417,25 @@ elif st.session_state.page == "setup":
     st.subheader("3. Learner support needs")
     st.caption("Please select all that apply.")
 
-    n1, n2 = st.columns(2)
+    target_modifications = st.multiselect(
+    "How would you like to adapt this lesson?",
+    [
+        "Reduce cognitive load",
+        "Simplify language",
+        "Audio accessibility",
+        "Improve visual accessibility"
+    ],
+    default=st.session_state.get("target_modifications", []),
+    placeholder="Select one or more options"
+)
+    st.session_state.target_modifications = target_modifications
 
-    with n1:
-        with st.container(border=True):
-            st.markdown("### 🧠 Reduce Cognitive Load")
-            st.caption(
-                "Make information processing easier by reducing complexity."
-            )
-            focus = st.checkbox(
-                "Enable cognitive support",
-                key="focus_support"
-            )
+    focus = "Reduce cognitive load" in target_modifications
+    language = "Simplify language" in target_modifications
+    audio = "Add audio-friendly alternatives" in target_modifications
+    visual = "Improve visual accessibility" in target_modifications
 
-        with st.container(border=True):
-            st.markdown("### 📖 Simplify Language")
-            st.caption(
-                "Use clear and straightforward language that is easy to understand."
-            )
-            language = st.checkbox(
-                "Enable language support",
-                key="language_support"
-            )
-
-    with n2:
-        with st.container(border=True):
-            st.markdown("### 🔊 Add Audio-Friendly Alternatives")
-            st.caption(
-                "Provide content that can be accessed through audio or text-to-speech."
-            )
-            audio = st.checkbox(
-                "Enable audio support",
-                key="audio_support"
-            )
-
-        with st.container(border=True):
-            st.markdown("### 👁 Improve Visual Accessibility")
-            st.caption(
-                "Use clear layouts and simplified designs to make content easier to navigate."
-            )
-            vision = st.checkbox(
-                "Enable visual support",
-                key="visual_support"
-            )
-
-        st.write("")
+    st.write("")
 
     button_left, button_mid, button_right = st.columns([1, 1.2, 1])
 
@@ -550,35 +527,35 @@ elif st.session_state.page == "analysis":
                         st.markdown(f"### ⚠️ {issues[idx]['title']}")
                         st.write(issues[idx]["detail"])
 
-    st.write("")
-    st.subheader("Classroom-aware recommendations")
+    # st.write("")
+    # st.subheader("Classroom-aware recommendations")
 
-    r1, r2 = st.columns(2)
-    with r1:
-        with st.container(border=True):
-            st.markdown("### ✅ Adapt the material")
-            st.write(
-                "Break instructions into smaller steps, explain difficult vocabulary, "
-                "and create a print-friendly version."
-            )
+    # r1, r2 = st.columns(2)
+    # with r1:
+    #     with st.container(border=True):
+    #         st.markdown("### ✅ Adapt the material")
+    #         st.write(
+    #             "Break instructions into smaller steps, explain difficult vocabulary, "
+    #             "and create a print-friendly version."
+    #         )
 
-    with r2:
-        with st.container(border=True):
-            st.markdown("### 🧩 Resource-aware adjustment")
-            p = st.session_state.profile
-            if p.get("devices", 0) < 5:
-                st.write(
-                    "There are too few devices for individual digital activities. "
-                    "Prefer paired/group work and printable resources."
-                )
-            elif p.get("internet") in ["Limited", "None"]:
-                st.write(
-                    "Avoid activities that depend on streaming or constant internet access."
-                )
-            else:
-                st.write(
-                    "Digital activities are feasible, but provide a printable alternative where possible."
-                )
+    # with r2:
+    #     with st.container(border=True):
+    #         st.markdown("### 🧩 Resource-aware adjustment")
+    #         p = st.session_state.profile
+    #         if p.get("devices", 0) < 5:
+    #             st.write(
+    #                 "There are too few devices for individual digital activities. "
+    #                 "Prefer paired/group work and printable resources."
+    #             )
+    #         elif p.get("internet") in ["Limited", "None"]:
+    #             st.write(
+    #                 "Avoid activities that depend on streaming or constant internet access."
+    #             )
+    #         else:
+    #             st.write(
+    #                 "Digital activities are feasible, but provide a printable alternative where possible."
+    #             )
 
     st.write("")
     c1, c2, c3 = st.columns([1, 1.2, 1])
@@ -588,6 +565,15 @@ elif st.session_state.page == "analysis":
             type="primary",
             use_container_width=True,
         ):
+            prompt = build_prompt(
+                st.session_state.lesson_text,
+                st.session_state.target_modifications
+            )
+
+            result = generate_adapted_lesson(prompt)
+
+            st.session_state.adapted_result = result
+
             go("result")
 
 
@@ -602,6 +588,20 @@ elif st.session_state.page == "result":
             go("analysis")
 
     st.divider()
+    # if "adapted_result" in st.session_state:
+    #     st.markdown(st.session_state.adapted_result)
+
+    full_result = st.session_state.adapted_result
+
+    if "## Accessibility Notes" in full_result:
+        adapted_lesson, accessibility_notes = full_result.split(
+            "## Accessibility Notes",
+        1
+    )
+    else:
+        adapted_lesson = full_result
+        accessibility_notes = "No additional accessibility notes."
+
 
     accessible_tab, guide_tab, original_tab = st.tabs(
         ["Accessible version", "Teacher guide", "Original"]
@@ -609,22 +609,21 @@ elif st.session_state.page == "result":
 
     with accessible_tab:
         with st.container(border=True):
-            st.markdown(mock_adapted_lesson())
+            st.markdown(adapted_lesson)
 
         st.download_button(
             "Download printable version",
-            data=mock_adapted_lesson(),
+            data=adapted_lesson,
             file_name="adapted_lesson.txt",
             mime="text/plain",
             use_container_width=False,
         )
 
     with guide_tab:
-        st.subheader("Why this version was adapted")
-        st.write(
-            "The prototype combines learner support needs with classroom constraints "
-            "instead of recommending adaptations in isolation."
-        )
+        with st.container(border=True):
+            st.markdown("## Accessibility Notes")
+            st.markdown(accessibility_notes)
+        
 
         st.subheader("Suggested classroom delivery")
         for item in mock_teacher_guide():

@@ -366,11 +366,11 @@ elif st.session_state.page == "setup":
     with left:
         st.subheader("1. Your lesson")
         with st.container(border=True, height = 500):
-            uploaded = st.file_uploader(
-                 "Upload a lesson",
-                 type=["pdf", "txt"],
-                 help="Upload your lesson here for analysis and simplification.",
-            )
+            # uploaded = st.file_uploader(
+            #     "Upload a lesson",
+            #     type=["pdf", "txt"],
+            #     help="Upload your lesson here for analysis and simplification.",
+            # )
 
             lesson = st.text_area(
                 "Paste lesson content",
@@ -420,20 +420,13 @@ elif st.session_state.page == "setup":
     st.caption("Please select all that apply.")
 
     target_modifications = st.multiselect(
-        "How would you like to adapt this lesson?",
-        [
-            "Reduce Cognitive Load",
-            "Simplify Language",
-            "Add Audio-Friendly Alternatives",
-            "Improve Visual Accessibility"
-        ],
-        default=st.session_state.get(
-            "target_modifications",
-            []
-        ),
-        placeholder="Select one or more options"
-    )
-
+    "How would you like to adapt this lesson?",
+    [
+        "Reduce cognitive load",
+        "Simplify language",
+        "Audio accessibility",
+        "Improve visual accessibility"
+    ],
     default=st.session_state.get("target_modifications", []),
     placeholder="Select one or more options"
 )
